@@ -18,7 +18,6 @@ dx = 0.25
 dy = 0.25
 mesh = fp.Grid2D(nx=nx, ny=ny, dx=dx, dy=dy)
 
-
 # In[373]:
 
 delta = 0.0
@@ -29,7 +28,7 @@ tau_0 = 1.
 DD = 10.
 W_0 = 1.
 lamda = DD * tau_0 / 0.6267 / W_0**2
-delta = 0.05
+delta = 0.5
 
 
 # In[374]:
@@ -63,7 +62,6 @@ def make_tau(phase_):
 
 tau = make_tau(phase)
 tau_old = make_tau(phase.old)
-
 
 # In[377]:
 
@@ -109,7 +107,7 @@ print tau_old
 
 initialize()
 dt.setValue(0.01)
-total_steps = 21
+total_steps = 20000
 sweeps = 5
 tolerance = 1e-1
 from fipy.solvers.pysparse import LinearLUSolver as Solver
@@ -139,8 +137,8 @@ while current_step < total_steps:
         elapsed_time += dt.value
         current_step += 1
         dt.setValue(dt.value * 1.1)
-        if current_step % 2 == 0:
-            np.savez_compressed('dump{0}.npz'.format(current_step), uu=np.array(uu), phase=np.array(phase), elapsed_time=np.array(elapsed_time))
+        if current_step % 10 == 0:
+            np.savez_compressed('data-test/dump{0}.npz'.format(current_step), uu=np.array(uu), phase=np.array(phase), elapsed_time=np.array(elapsed_time))
     else:
         dt.setValue(dt.value * 0.8)
         uu[:] == uu.old
