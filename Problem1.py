@@ -8,6 +8,7 @@
 import fipy as fp
 import fipy.tools.numerix as numerix
 from fipy.tools import dump
+import numpy as np
 
 # In[372]:
 
@@ -136,8 +137,8 @@ while current_step < total_steps:
     if (res_heat < res_heat0 * tolerance) and (res_phase < res_phase0 * tolerance):
         current_step += 1
         dt.setValue(dt.value * 1.1)
-        if current_step % 10 == 0:
-            dump.write((uu, phase), 'dump{0}.gz'.format(current_step))
+        if current_step % 2 == 0:
+            np.savez_compressed('dump{0}.npz'.format(current_step), uu=np.array(uu), phase=np.array(phase))
     else:
         dt.setValue(dt.value * 0.8)
         uu[:] == uu.old
