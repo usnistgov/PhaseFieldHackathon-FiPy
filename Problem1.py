@@ -36,7 +36,7 @@ delta = 0.05
 phase = fp.CellVariable(mesh=mesh, hasOld=True)
 uu = fp.CellVariable(mesh=mesh, hasOld=True)
 uu.constrain(-delta, mesh.exteriorFaces)
-dt = fp.Variable(1.0)
+dt = fp.Variable(0.01)
 
 
 # In[375]:
@@ -44,12 +44,12 @@ dt = fp.Variable(1.0)
 def initialize():
     phase[:] = -1.0
     x, y = mesh.cellCenters
-    radius = 2.0
+    radius = 4.0
     center = (nx * dx / 2., ny * dy / 2.)
     mask = (x - center[0])**2 + (y - center[1])**2 < radius**2
     phase.setValue(1., where=mask)
     uu[:] = -delta
-    dt = fp.Variable(0.1)
+
 initialize()
 
 
@@ -66,16 +66,15 @@ tau_old = make_tau(phase.old)
 
 # In[377]:
 
-source_explicit = 2 * phase**3 - lamda * uu * (1 - phase**2) * (1 + 3 * phase**2)
-source_implicit = (1 - 3 * phase**2) + 4 * lamda * uu * phase * (1 - phase**2)
+source = (phase - lamda * uu * (1 - phase**2)) * (1 - phase**2)
 
 
 # In[378]:
 
 theta = numerix.arctan2(phase.faceGrad[1], phase.faceGrad[0])
-W = W_0 * (1 + epsilon_m * numerix.cos(mm * theta + theta_0))
+W = W_0 * (1 + epsilon_m * numerix.cos(mm * theta - theta_0))
 
-W_theta = - W_0 * mm * epsilon_m * numerix.sin(mm * theta + theta_0)
+W_theta = - W_0 * mm * epsilon_m * numerix.sin(mm * theta - theta_0)
 
 I0 = fp.Variable(value=((1,0), (0,1)))
 I1 = fp.Variable(value=((0,-1), (1,0)))
@@ -87,7 +86,7 @@ Dphase = W**2 * I0 + W * W_theta * I1
 
 heat_eqn = fp.TransientTerm() == fp.DiffusionTerm(DD) + (phase - phase.old) / dt / 2.
 
-phase_eqn = fp.TransientTerm(tau) == fp.DiffusionTerm(Dphase) + source_explicit + fp.ImplicitSourceTerm(source_implicit) #+ fp.ImplicitSourceTerm((tau - tau_old) / dt)
+phase_eqn = fp.TransientTerm(tau) == fp.DiffusionTerm(Dphase) + source
 
 
 # In[380]:
