@@ -95,13 +95,8 @@ phase_eqn = fp.TransientTerm(tau) == fp.DiffusionTerm(Dphase) + source_explicit 
 print max(tau), min(tau)
 
 
-# In[360]:
-
-phase_viewer = fp.Viewer(phase)
-phase_viewer.plot()
 
 
-# In[361]:
 
 print tau_old
 
@@ -114,7 +109,7 @@ print tau_old
 
 initialize()
 dt.setValue(0.01)
-total_steps = 20
+total_steps = 21
 sweeps = 5
 tolerance = 1e-1
 from fipy.solvers.pysparse import LinearLUSolver as Solver
@@ -142,7 +137,8 @@ while current_step < total_steps:
     if (res_heat < res_heat0 * tolerance) and (res_phase < res_phase0 * tolerance):
         current_step += 1
         dt.setValue(dt.value * 1.1)
-        dump.write((uu, phase), 'dump{0}.gz'.format(current_step))
+        if current_step % 10 == 0:
+            dump.write((uu, phase), 'dump{0}.gz'.format(current_step))
     else:
         dt.setValue(dt.value * 0.8)
         uu[:] == uu.old
@@ -152,7 +148,6 @@ while current_step < total_steps:
 
 # In[371]:
 
-phase_viewer.plot()
 
 
 # In[335]:
