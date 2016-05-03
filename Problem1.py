@@ -115,8 +115,9 @@ tolerance = 1e-1
 from fipy.solvers.pysparse import LinearLUSolver as Solver
 solver_heat = Solver()
 solver_phase = Solver()
-
+elapsed_time = 0.0
 current_step = 0
+
 while current_step < total_steps:
     uu.updateOld()
     phase.updateOld()
@@ -135,10 +136,11 @@ while current_step < total_steps:
     print 'res_heat',res_heat0, res_heat
     print 'res_phase',res_phase0, res_phase
     if (res_heat < res_heat0 * tolerance) and (res_phase < res_phase0 * tolerance):
+        elapsed_time += dt.value
         current_step += 1
         dt.setValue(dt.value * 1.1)
         if current_step % 2 == 0:
-            np.savez_compressed('dump{0}.npz'.format(current_step), uu=np.array(uu), phase=np.array(phase))
+            np.savez_compressed('dump{0}.npz'.format(current_step), uu=np.array(uu), phase=np.array(phase), elapsed_time=np.array(elapsed_time))
     else:
         dt.setValue(dt.value * 0.8)
         uu[:] == uu.old

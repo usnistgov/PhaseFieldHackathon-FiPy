@@ -13,6 +13,8 @@ uu = fp.CellVariable(mesh=mesh, value=data['uu'])
 phase = fp.CellVariable(mesh=mesh, value=data['phase'])
 u_viewer = fp.Viewer(uu)
 phase_viewer = fp.Viewer(phase)
+elapsed_time = data['elapsed_time']
 u_viewer.plot()
-phase_viewer.plot
+phase_viewer.plot()
+print 'elapsed_time',elapsed_time
 raw_input('stopped')
