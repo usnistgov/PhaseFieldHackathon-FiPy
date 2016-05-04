@@ -1,24 +1,24 @@
+from fipy import CellVariable, Grid2D, Viewer
 from fipy.tools import dump
-import fipy as fp
 import numpy as np
 import sys
 
 dx = dy = 0.25
 nx = ny = 400
 
-mesh = fp.Grid2D(nx=nx, ny=ny, dx=dx, dy=dy)
+mesh = Grid2D(nx=nx, ny=ny, dx=dx, dy=dy)
 
 def get_vars(current_step):
     data = np.load('data-test/dump{0}.npz'.format(current_step))
-    uu = fp.CellVariable(mesh=mesh, value=data['uu'])
-    phase = fp.CellVariable(mesh=mesh, value=data['phase'])
+    uu = CellVariable(mesh=mesh, value=data['uu'])
+    phase = CellVariable(mesh=mesh, value=data['phase'])
     return uu, phase, data['elapsed_time']
 
 current_step = sys.argv[1]
 uu, phase, elapsed_time = get_vars(current_step)
 
-u_viewer = fp.Viewer(uu)
-phase_viewer = fp.Viewer(phase)
+u_viewer = Viewer(uu)
+phase_viewer = Viewer(phase)
 u_viewer.plot()
 phase_viewer.plot()
 print 'elapsed_time',elapsed_time
