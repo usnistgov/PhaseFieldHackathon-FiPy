@@ -9,6 +9,8 @@ import fipy as fp
 import fipy.tools.numerix as numerix
 from fipy.tools import dump
 import numpy as np
+from mpi4py import MPI
+from fipy import parallelComm
 
 # In[372]:
 
@@ -137,7 +139,10 @@ while current_step < total_steps:
         current_step += 1
         dt.setValue(dt.value * 1.1)
         if current_step % 10 == 0:
-            np.savez_compressed('data-test/dump{0}.npz'.format(current_step), uu=np.array(uu), phase=np.array(phase), elapsed_time=np.array(elapsed_time))
+            glu = uu.globalValue
+            glp = phase.globalValue
+            if parallelComm.procID==0:
+                np.savez_compressed('data-test/dump{0}.npz'.format(current_step), uu=np.array(glu), phase=np.array(glp), elapsed_time=np.array(elapsed_time))
     else:
         dt.setValue(dt.value * 0.8)
         uu[:] == uu.old
