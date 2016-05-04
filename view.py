@@ -9,7 +9,7 @@ nx = ny = 400
 mesh = fp.Grid2D(nx=nx, ny=ny, dx=dx, dy=dy)
 
 def get_vars(current_step):
-    data = np.load('data/dump{0}.npz'.format(current_step))
+    data = np.load('data-test/dump{0}.npz'.format(current_step))
     uu = fp.CellVariable(mesh=mesh, value=data['uu'])
     phase = fp.CellVariable(mesh=mesh, value=data['phase'])
     return uu, phase, data['elapsed_time']
