@@ -1,4 +1,4 @@
-from fipy import CellVariable, Grid2D, Viewer
+from fipy import CellVariable, Grid2D, Variable, Viewer
 from fipy.tools import dump
 import numpy as np
 import sys
@@ -17,13 +17,15 @@ def get_vars(current_step):
 current_step = sys.argv[1]
 uu, phase, elapsed_time = get_vars(current_step)
 
-u_viewer = Viewer(uu)
-phase_viewer = Viewer(phase)
+u_viewer = Viewer(uu,title=r'$u$')
+phase_viewer = Viewer(phase,title=r'$\phi$')
 u_viewer.plot()
 phase_viewer.plot()
 print 'elapsed_time',elapsed_time
+D = 10
 
-
+v = np.array(-(uu.faceGrad * Variable((1,0))).divergence * dx * D)
+v_line = v.reshape((nx,ny))[nx / 2]
 
 counts = []
 counts1d = []
@@ -39,16 +41,17 @@ area0 = counts[0] * dx * dy
 r0 = np.sqrt(area0 / np.pi)
 area1 = counts[-1] * dx * dy
 r1 = np.sqrt(area1 / np.pi)
-t0 = times[0]
+t0 = times[-10]
 t1 = times[-1]
+r0_ = dx * counts1d[-10] / 2
 r1_ = dx * counts1d[-1] / 2
-r0_ = dx * counts1d[0] / 2
-print 'exapansion rate:',(r1 - r0) / (t1 - t0)
 
+print 'exapansion rate:',(r1 - r0) / (t1 - t0)
 print 'tip velocity:',(r1_ - r0_) / (t1 - t0)
 
 import matplotlib.pyplot as plt
 plt.figure()
-plt.plot(times, counts)
+#plt.plot(times, counts)
+plt.plot(v_line)
 plt.show()
 raw_input('stopped')
