@@ -30,12 +30,24 @@ v_line = v.reshape((nx,ny))[nx / 2]
 counts = []
 counts1d = []
 times = []
+crossings = []
+
 for step in  np.arange(10, int(current_step) + 1, 10):
     uu, phase, elapsed_time = get_vars(step)
     counts.append((np.array(phase) > 0).sum())
     count1d = (np.array(phase).reshape((nx,ny))[nx / 2] > 0).sum()
     counts1d.append(count1d)
     times.append(elapsed_time)
+    # Estimate 0-level crossing (dendrite tip location)
+    p_line = np.array(phase).reshape((nx,ny))[nx / 2]
+    i = nx/2
+    while p_line[i] > 0.:
+        i += 1
+    x_l = dx * (i-1)
+    x_r = dx * i
+    phi_l = p_line[i-1]
+    phi_r = p_line[i]
+    crossings.append(x_l + (-phi_l/(phi_r - phi_l)))
 
 area0 = counts[0] * dx * dy
 r0 = np.sqrt(area0 / np.pi)
@@ -50,11 +62,28 @@ print 'exapansion rate:',(r1 - r0) / (t1 - t0)
 print 'tip velocity:',(r1_ - r0_) / (t1 - t0)
 
 import matplotlib.pyplot as plt
+
 plt.figure()
-#plt.plot(times, counts)
 plt.plot(v_line)
 plt.xlabel('position')
 plt.ylabel('$v$')
 plt.title('Growth Velocity')
-plt.show()
+plt.savefig('growth_velocity.png', dpi=400, bbox_inches='tight')
+plt.close()
+
+plt.figure()
+plt.plot(times, counts)
+plt.xlabel('$t$')
+plt.ylabel('$A$')
+plt.savefig('solid_area.png', dpi=400, bbox_inches='tight')
+plt.close()
+
+plt.figure()
+plt.plot(times,crossings)
+plt.xlabel('$t$')
+plt.ylabel('$x$')
+plt.title('Tip Position')
+plt.savefig('tip_position.png', dpi=400, bbox_inches='tight')
+plt.close()
+
 raw_input('stopped')
