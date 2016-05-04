@@ -23,11 +23,16 @@ u_viewer.plot()
 phase_viewer.plot()
 print 'elapsed_time',elapsed_time
 
+
+
 counts = []
+counts1d = []
 times = []
 for step in  np.arange(10, int(current_step) + 1, 10):
     uu, phase, elapsed_time = get_vars(step)
     counts.append((np.array(phase) > 0).sum())
+    count1d = (np.array(phase).reshape((nx,ny))[nx / 2] > 0).sum()
+    counts1d.append(count1d)
     times.append(elapsed_time)
 
 area0 = counts[0] * dx * dy
@@ -36,7 +41,11 @@ area1 = counts[-1] * dx * dy
 r1 = np.sqrt(area1 / np.pi)
 t0 = times[0]
 t1 = times[-1]
+r1_ = dx * counts1d[-1] / 2
+r0_ = dx * counts1d[0] / 2
 print 'exapansion rate:',(r1 - r0) / (t1 - t0)
+
+print 'tip velocity:',(r1_ - r0_) / (t1 - t0)
 
 import matplotlib.pyplot as plt
 plt.figure()

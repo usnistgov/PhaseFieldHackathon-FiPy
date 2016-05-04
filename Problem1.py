@@ -20,7 +20,6 @@ mesh = fp.Grid2D(nx=nx, ny=ny, dx=dx, dy=dy)
 
 # In[373]:
 
-delta = 0.0
 mm = 4.
 epsilon_m = 0.025
 theta_0 = 0.0
@@ -28,7 +27,7 @@ tau_0 = 1.
 DD = 10.
 W_0 = 1.
 lamda = DD * tau_0 / 0.6267 / W_0**2
-delta = 0.5
+delta = 0.0
 
 
 # In[374]:
@@ -36,7 +35,7 @@ delta = 0.5
 phase = fp.CellVariable(mesh=mesh, hasOld=True)
 uu = fp.CellVariable(mesh=mesh, hasOld=True)
 uu.constrain(-delta, mesh.exteriorFaces)
-dt = fp.Variable(0.01)
+dt = fp.Variable(0.1)
 
 
 # In[375]:
@@ -106,10 +105,10 @@ print tau_old
 # In[ ]:
 
 initialize()
-dt.setValue(0.01)
+
 total_steps = 20000
-sweeps = 5
-tolerance = 1e-1
+sweeps = 3
+tolerance = 10.
 from fipy.solvers.pysparse import LinearLUSolver as Solver
 solver_heat = Solver()
 solver_phase = Solver()
