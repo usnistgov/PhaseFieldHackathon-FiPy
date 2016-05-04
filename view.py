@@ -17,8 +17,8 @@ def get_vars(current_step):
 current_step = sys.argv[1]
 uu, phase, elapsed_time = get_vars(current_step)
 
-u_viewer = Viewer(uu)
-phase_viewer = Viewer(phase)
+u_viewer = Viewer(uu,title=r'$u$')
+phase_viewer = Viewer(phase,title=r'$\phi$')
 u_viewer.plot()
 phase_viewer.plot()
 print 'elapsed_time',elapsed_time
