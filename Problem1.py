@@ -1,10 +1,6 @@
 
 # coding: utf-8
 
-# In[257]:
-
-
-
 import fipy as fp
 import fipy.tools.numerix as numerix
 from fipy.tools import dump
@@ -12,15 +8,11 @@ import numpy as np
 from mpi4py import MPI
 from fipy import parallelComm
 
-# In[372]:
-
 nx = 400
 ny = 400
 dx = 0.25
 dy = 0.25
 mesh = fp.Grid2D(nx=nx, ny=ny, dx=dx, dy=dy)
-
-# In[373]:
 
 mm = 4.
 epsilon_m = 0.025
@@ -31,16 +23,11 @@ W_0 = 1.
 lamda = DD * tau_0 / 0.6267 / W_0**2
 delta = 0.0
 
-
-# In[374]:
-
 phase = fp.CellVariable(mesh=mesh, hasOld=True)
 uu = fp.CellVariable(mesh=mesh, hasOld=True)
 uu.constrain(-delta, mesh.exteriorFaces)
 dt = fp.Variable(0.1)
 
-
-# In[375]:
 
 def initialize():
     phase[:] = -1.0
@@ -54,8 +41,6 @@ def initialize():
 initialize()
 
 
-# In[376]:
-
 def make_tau(phase_):
     theta_cell = numerix.arctan2(phase_.grad[1], phase_.grad[0])
     a_cell = 1 + epsilon_m * numerix.cos(mm * theta_cell + theta_0)
@@ -64,12 +49,8 @@ def make_tau(phase_):
 tau = make_tau(phase)
 tau_old = make_tau(phase.old)
 
-# In[377]:
-
 source = (phase - lamda * uu * (1 - phase**2)) * (1 - phase**2)
 
-
-# In[378]:
 
 theta = numerix.arctan2(phase.faceGrad[1], phase.faceGrad[0])
 W = W_0 * (1 + epsilon_m * numerix.cos(mm * theta - theta_0))
@@ -82,38 +63,23 @@ I1 = fp.Variable(value=((0,-1), (1,0)))
 Dphase = W**2 * I0 + W * W_theta * I1
 
 
-# In[379]:
-
 heat_eqn = fp.TransientTerm() == fp.DiffusionTerm(DD) + (phase - phase.old) / dt / 2.
 
 phase_eqn = fp.TransientTerm(tau) == fp.DiffusionTerm(Dphase) + source
 
 
-# In[380]:
+if parallelComm.procID==0:
+    print max(tau), min(tau)
 
-print max(tau), min(tau)
-
-
-
-
-
-print tau_old
-
-
-# In[367]:
-
-
-
-# In[ ]:
 
 initialize()
 
 total_steps = 20000
 sweeps = 3
-tolerance = 10.
-from fipy.solvers.pysparse import LinearLUSolver as Solver
-solver_heat = Solver()
-solver_phase = Solver()
+tolerance = 0.1
+from fipy.solvers.trilinos import LinearGMRESSolver as Solver
+solver_heat = Solver(precon=None)
+solver_phase = Solver(precon=None)
 elapsed_time = 0.0
 current_step = 0
 
@@ -129,11 +95,13 @@ while current_step < total_steps:
         res_phase = phase_eqn.sweep(phase, dt=dt.value, solver=solver_phase)
 
 
-    print
-    print 'dt',dt.value
-    print 'current_step',current_step
-    print 'res_heat',res_heat0, res_heat
-    print 'res_phase',res_phase0, res_phase
+    if parallelComm.procID==0:
+        print tau_old
+        print
+        print 'dt',dt.value
+        print 'current_step',current_step
+        print 'res_heat',res_heat0, res_heat
+        print 'res_phase',res_phase0, res_phase
     if (res_heat < res_heat0 * tolerance) and (res_phase < res_phase0 * tolerance):
         elapsed_time += dt.value
         current_step += 1
@@ -147,16 +115,3 @@ while current_step < total_steps:
         dt.setValue(dt.value * 0.8)
         uu[:] == uu.old
         phase[:] = phase.old
-
-
-
-# In[371]:
-
-
-
-# In[335]:
-
-print phase
-
-
-# In[ ]:
