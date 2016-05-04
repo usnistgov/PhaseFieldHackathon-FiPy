@@ -17,8 +17,8 @@ def get_vars(current_step):
 current_step = sys.argv[1]
 uu, phase, elapsed_time = get_vars(current_step)
 
-u_viewer = Viewer(uu,title=r'$u$')
-phase_viewer = Viewer(phase,title=r'$\phi$')
+u_viewer = Viewer(uu,title=r'$u$ at $t=$%.3f'%(elapsed_time))
+phase_viewer = Viewer(phase,title=r'$\phi$ at $t=$%.3f'%elapsed_time)
 u_viewer.plot()
 phase_viewer.plot()
 print 'elapsed_time',elapsed_time
@@ -53,5 +53,8 @@ import matplotlib.pyplot as plt
 plt.figure()
 #plt.plot(times, counts)
 plt.plot(v_line)
+plt.xlabel('position')
+plt.ylabel('$v$')
+plt.title('Growth Velocity')
 plt.show()
 raw_input('stopped')
