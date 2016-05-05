@@ -3,8 +3,8 @@ from fipy.tools import dump
 import numpy as np
 import sys
 
-dx = dy = 0.25
-nx = ny = 400
+dx = dy = 1.0
+nx = ny = 100
 
 mesh = Grid2D(nx=nx, ny=ny, dx=dx, dy=dy)
 

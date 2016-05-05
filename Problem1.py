@@ -6,8 +6,8 @@ from fipy.tools import dump, numerix
 import numpy as np
 
 # Numerical parameters
-nx = ny = 400         # domain size
-dx = dy = 0.25        # mesh resolution
+nx = ny = 100         # domain size
+dx = dy = 1.0        # mesh resolution
 dt = Variable(0.1) # initial timestep
 
 # Physical parameters
@@ -30,7 +30,7 @@ uu.constrain(-delta, mesh.exteriorFaces)
 def initialize():
     phase[:] = -1.0
     x, y = mesh.cellCenters
-    radius = 4.0 # Initial r=1 collapses due to Gibbs-Thomson, r=2 slumps to phi=0.6, r=4 seems OK.
+    radius = 2.0 # Initial r=1 collapses due to Gibbs-Thomson, r=2 slumps to phi=0.6, r=4 seems OK.
     center = (nx * dx / 2., ny * dy / 2.)
     mask = (x - center[0])**2 + (y - center[1])**2 < radius**2
     phase.setValue(1., where=mask)
@@ -71,10 +71,9 @@ solid_area = (np.array(phase.globalValue)>0).sum()*dx*dy # initial size of solid
 if parallelComm.procID==0:
     print 'solid area', solid_area
 
-
 total_steps = 20000
-sweeps = 3
-tolerance = 0.1
+sweeps = 2
+tolerance = 0.5
 
 # Serial:
 #from fipy.solvers.pysparse import LinearLUSolver as Solver
@@ -99,6 +98,13 @@ while current_step < total_steps:
     for sweep in range(sweeps):
         res_heat = heat_eqn.sweep(uu, dt=dt.value, solver=solver_heat)
         res_phase = phase_eqn.sweep(phase, dt=dt.value, solver=solver_phase)
+        if sweep == 0:
+            res_heat1 = res_heat
+            res_phase1 = res_phase
+        print
+        print 'sweep',sweep
+        print res_heat
+        print res_phase
 
     solid_area = (np.array(phase.globalValue)>0).sum()*dx*dy # initial size of solid nucleus
 
@@ -109,7 +115,7 @@ while current_step < total_steps:
         print 'res_heat',res_heat0, res_heat
         print 'res_phase',res_phase0, res_phase
         print 'solid area', solid_area
-    if (res_heat < res_heat0 * tolerance) and (res_phase < res_phase0 * tolerance):
+    if (res_heat < res_heat1 * tolerance) and (res_phase < res_phase1 * tolerance):
         elapsed_time += dt.value
         current_step += 1
         dt.setValue(dt.value * 1.1)
